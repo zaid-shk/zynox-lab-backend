@@ -5,13 +5,15 @@ const { taskRouter } = require("./routes/task.route");
 const cors = require("cors");
 const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  }),
-);
+app.use(cors());
 app.use(express.json());
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Server is healthy",
+  });
+});
 
 //Router for Users
 app.use("/api/v1/user", userRouter);
