@@ -44,14 +44,21 @@ async function bulkTask(req, res) {
   const userId = req.userId;
 
   try {
-    const taskBulk = await taskModel.find({});
-    res.status(200).json({
-      message: "Successfuly task fetch",
-      taskBulk,
+    const userProjects = await projectModel.find({ owner: userId }).select("_id");
+
+    const taskBulk = await taskModel.find({ project: { $in: userProjects } });
+
+    return res.status(200).json({
+      success: true,
+      message: "Successfully tasks fetched",
+      tasks: taskBulk,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Task's Not Found",
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
     });
   }
 }

@@ -62,14 +62,19 @@ async function projectBulk(req, res) {
   const userId = req.userId;
 
   try {
-    const projectBulk = await projectModel.find({});
-    res.json({
+    const projectBulk = await projectModel.find({ owner: userId });
+
+    return res.status(200).json({
+      success: true,
       message: "Project Fetched",
-      projectBulk,
+      projects: projectBulk,
     });
   } catch (error) {
-    res.json({
-      message: "Somthing Wrong",
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
     });
   }
 }
@@ -79,19 +84,41 @@ async function editProject(req, res) {
   const { title, description, status } = req.body;
 
   try {
-    const editProject = await projectModel.findByIdAndUpdate(projectId, {
-      projectName: title,
-      description: description,
-      status: status,
-    });
-    res.json({
-      message: "Successfuly edited",
-      editProject,
+    const project = await projectModel.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project Not Found",
+      });
+    }
+
+    if (project.owner.toString() !== userId) {
+      return res.status(403).json({
+        message: "You are not allowed to edit this project",
+      });
+    }
+
+    const editProject = await projectModel.findByIdAndUpdate(
+      projectId,
+      {
+        projectName: title,
+        description: description,
+        status: status,
+      },
+      { new: true },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Successfully edited",
+      project: editProject,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Somthing Wrong",
-      error,
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
     });
   }
 }

@@ -29,6 +29,7 @@ const projectSchema = new Schema(
       enum: ["active", "completed", "archived"],
       default: "active",
     },
+    
     is_color: {
       type: String,
       enum: ["green", "yellow", "blue", "purple", "black"],
